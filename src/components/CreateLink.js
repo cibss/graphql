@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMutation, gql } from "@apollo/client";
 import { FEED_QUERY } from "./LinkList";
-import { AUTH_TOKEN, LINKS_PER_PAGE } from "../constants";
+import { LINKS_PER_PAGE } from "../constants";
 
 const CREATE_LINK_MUTATION = gql`
   mutation PostMutation($description: String!, $url: String!) {
