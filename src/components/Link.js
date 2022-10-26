@@ -1,6 +1,6 @@
 import React from "react";
-import { AUTH_TOKEN } from "../constants";
-import { FEED_QUERY } from './LinkList';
+import { AUTH_TOKEN, LINKS_PER_PAGE } from "../constants";
+import { FEED_QUERY } from "./LinkList";
 import { timeDifferenceForDate } from "../utils";
 import { useMutation, gql } from "@apollo/client";
 
@@ -25,23 +25,32 @@ const VOTE_MUTATION = gql`
 `;
 
 const Link = (props) => {
+  const take = LINKS_PER_PAGE;
+  const skip = 0;
+  const orderBy = { createdAt: "desc" };
+
   const { link } = props;
   const authToken = localStorage.getItem(AUTH_TOKEN);
 
   const [vote] = useMutation(VOTE_MUTATION, {
     variables: {
-      linkId: link.id
+      linkId: link.id,
     },
-    update: (cache, {data: {vote}}) => {
+    update: (cache, { data: { vote } }) => {
       const { feed } = cache.readQuery({
-        query: FEED_QUERY
+        query: FEED_QUERY,
+        variables: {
+          take,
+          skip,
+          orderBy,
+        },
       });
 
       const updatedLinks = feed.links.map((feedLink) => {
         if (feedLink.id === link.id) {
           return {
             ...feedLink,
-            votes: [...feedLink.votes, vote]
+            votes: [...feedLink.votes, vote],
           };
         }
         return feedLink;
@@ -51,11 +60,16 @@ const Link = (props) => {
         query: FEED_QUERY,
         data: {
           feed: {
-            links: updatedLinks
-          }
-        }
+            links: updatedLinks,
+          },
+        },
+        variables: {
+          take,
+          skip,
+          orderBy,
+        },
       });
-    }
+    },
   });
 
   return (
